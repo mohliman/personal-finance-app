@@ -1,5 +1,7 @@
 # Personal finance app
 
+Live demo: [View site](https://personal-finance-app-swart-pi.vercel.app) | [GitHub repository](https://github.com/mohliman/personal-finance-app)
+
 A React implementation of the Frontend Mentor personal finance challenge. The original challenge brief is retained below. The supplied starter files, assets, font licenses, and design-file exclusions are preserved.
 
 ## Run locally
@@ -22,7 +24,7 @@ npm test
 npm run test:e2e
 ```
 
-The production build is written to `dist/`. On a static host, route requests must fall back to `index.html` for React Router. No public deployment is configured or performed.
+The production build is written to `dist/`. On a static host, route requests must fall back to `index.html` for React Router. Deployed on Vercel with the route fallback configured in `vercel.json`.
 
 Browser tests run against the production build, so run `npm run build` before `npm run test:e2e`. Playwright starts a temporary production preview on port 5198. On Windows the tests use the installed Chrome at `C:/Program Files/Google/Chrome/Application/chrome.exe`. Set the optional `PLAYWRIGHT_BROWSER_PATH` environment variable to use a different browser executable; on other operating systems install Chromium with `npx playwright install chromium`.
 
