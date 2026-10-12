@@ -1,0 +1,12 @@
+node_modules
+dist
+.git
+test-results*
+playwright-report
+tests/screenshots
+*.log
+*.tsbuildinfo
+*.fig
+*.sketch
+*.xd
+.env*
