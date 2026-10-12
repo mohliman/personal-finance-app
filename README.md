@@ -1,6 +1,6 @@
 # Personal finance app
 
-Live demo: [View site](https://personal-finance-app-swart-pi.vercel.app) | [GitHub repository](https://github.com/mohliman/personal-finance-app)
+Live demo: [View site](https://personal-finance-ui.vercel.app) | [GitHub repository](https://github.com/mohliman/personal-finance-app)
 
 A React implementation of the Frontend Mentor personal finance challenge. The original challenge brief is retained below. The supplied starter files, assets, font licenses, and design-file exclusions are preserved.
 
