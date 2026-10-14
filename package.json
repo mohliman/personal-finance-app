@@ -4,11 +4,16 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --host 127.0.0.1",
-    "build": "tsc -b && vite build",
+    "dev": "npm run build:server && node --env-file-if-exists=.env scripts/dev.mjs",
+    "build": "tsc -b && vite build && npm run build:server",
     "preview": "vite preview --host 127.0.0.1",
     "test": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "npm run test:fullstack",
+    "dev:ui": "vite --host 127.0.0.1 --port 5197",
+    "build:server": "node scripts/build-server.mjs",
+    "start": "node --env-file-if-exists=.env server/dist/index.mjs",
+    "test:server": "npm run build:server && node --test server/*.test.mjs",
+    "test:fullstack": "npm run build && node scripts/fullstack-verify.mjs"
   },
   "dependencies": {
     "react": "^19.2.0",
@@ -23,6 +28,10 @@
     "@vitejs/plugin-react": "^5.0.4",
     "typescript": "~5.9.3",
     "vite": "^7.1.9",
-    "vitest": "^5.0.3"
+    "vitest": "^5.0.3",
+    "esbuild": "^0.28.2"
+  },
+  "engines": {
+    "node": ">=24.16.0"
   }
 }

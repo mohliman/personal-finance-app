@@ -1,0 +1,15 @@
+{
+  "checks": [
+    "Registration starts a private empty account",
+    "Opening balance saves",
+    "Manual transaction saves",
+    "Transaction edit survives reload",
+    "Savings pot creation and transfer",
+    "Balances reflect expense plus savings transfer",
+    "Desktop overview accessibility scan",
+    "Five routes fit mobile width",
+    "Sign out and sign in restore records"
+  ],
+  "errors": [],
+  "violations": []
+}

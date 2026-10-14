@@ -19,3 +19,13 @@ h2 { font-size: 20px; line-height: 1.2; font-weight: 700; }
 ul { margin: 0; padding: 0; list-style: none; }
 img { max-width: 100%; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; } }
+
+.finance-account .account-story { background:#201f24; }
+.finance-account .account-primary { background:#201f24; }
+.transaction-fields { border:0; padding:0; margin:0; display:grid; gap:16px; }
+.transaction-actions { display:flex; gap:12px; margin-top:8px; }
+.transaction-actions button { background:none; border:0; color:#277c78; padding:4px 0; cursor:pointer; text-decoration:underline; font:inherit; font-size:12px; }
+.opening-form { display:flex; flex-wrap:wrap; gap:12px; align-items:end; padding:20px; border:1px solid #b5aaa0; border-radius:8px; background:white; margin-bottom:20px; }
+.opening-form label { display:grid; gap:8px; font-size:13px; }
+.opening-form input, .account-bar input { padding:8px; border:1px solid #b5aaa0; border-radius:5px; font:inherit; background:transparent; }
+.opening-form button { padding:10px 14px; border:0; border-radius:5px; background:#201f24; color:white; cursor:pointer; }

@@ -1,31 +1,99 @@
-import { createContext, useContext, useEffect, useReducer, useState, type Dispatch, type ReactNode } from 'react';
-import { financeReducer, initialState, STORAGE_KEY, validStoredState } from './finance';
-import type { Action, FinanceState } from './types';
-
-const FinanceContext = createContext<{ state: FinanceState; dispatch: Dispatch<Action>; storageWarning: string | null } | null>(null);
-function loadState(): { state: FinanceState; warning: string | null } {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (!saved) return { state: initialState, warning: null };
-    const parsed: unknown = JSON.parse(saved);
-    if (validStoredState(parsed)) return { state: parsed, warning: null };
-    return { state: initialState, warning: 'Your saved data could not be read. The original sample data has been loaded.' };
-  } catch {
-    return { state: initialState, warning: 'Browser storage is unavailable or unreadable. Changes may only last for this session.' };
-  }
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import { api } from "./account/api";
+import type { Action, FinanceState, Transaction } from "./types";
+export type AccountAction =
+  | Action
+  | { type: "save-transaction"; transaction: Transaction }
+  | { type: "delete-transaction"; id: string }
+  | { type: "set-month"; month: string }
+  | { type: "set-opening"; amount: number }
+  | { type: "import-legacy"; state: FinanceState };
+interface Snapshot {
+  state: FinanceState;
+  transactions: Transaction[];
+  month: string;
+  revision: number;
+  openingBalance: number;
 }
+interface Context extends Snapshot {
+  dispatch: (action: AccountAction) => Promise<boolean>;
+  storageWarning: string | null;
+  busy: boolean;
+  refresh: () => Promise<void>;
+}
+const FinanceContext = createContext<Context | null>(null);
 export function FinanceProvider({ children }: { children: ReactNode }) {
-  const [loaded] = useState(loadState);
-  const [state, dispatch] = useReducer(financeReducer, loaded.state);
-  const [storageWarning, setStorageWarning] = useState(loaded.warning);
+  const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
+  const [storageWarning, setWarning] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const lock = useRef(false);
+  async function refresh() {
+    if (lock.current) return;
+    lock.current = true;
+    setBusy(true);
+    try {
+      setSnapshot(await api<Snapshot>("/api/state"));
+      setWarning(null);
+    } catch (e) {
+      setWarning((e as Error).message);
+    } finally {
+      lock.current = false;
+      setBusy(false);
+    }
+  }
   useEffect(() => {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
-    catch { setStorageWarning('Changes are available in this session, but could not be saved to browser storage.'); }
-  }, [state]);
-  return <FinanceContext.Provider value={{ state, dispatch, storageWarning }}>{children}</FinanceContext.Provider>;
+    void refresh();
+  }, []);
+  async function dispatch(action: AccountAction) {
+    if (!snapshot || lock.current) {
+      setWarning("Please wait for the current save to finish.");
+      return false;
+    }
+    lock.current = true;
+    setBusy(true);
+    setWarning(null);
+    try {
+      setSnapshot(
+        await api<Snapshot>("/api/actions", "POST", {
+          action,
+          revision: snapshot.revision,
+        }),
+      );
+      return true;
+    } catch (e) {
+      setWarning(`Change not saved. ${(e as Error).message}`);
+      return false;
+    } finally {
+      lock.current = false;
+      setBusy(false);
+    }
+  }
+  if (!snapshot)
+    return (
+      <main className="account-loading">
+        <p role="status">{storageWarning || "Loading your finances…"}</p>
+        <button disabled={busy} onClick={() => void refresh()}>
+          Try again
+        </button>
+      </main>
+    );
+  return (
+    <FinanceContext.Provider
+      value={{ ...snapshot, dispatch, storageWarning, busy, refresh }}
+    >
+      {children}
+    </FinanceContext.Provider>
+  );
 }
 export function useFinance() {
   const context = useContext(FinanceContext);
-  if (!context) throw new Error('FinanceProvider is required');
+  if (!context) throw new Error("FinanceProvider required");
   return context;
 }

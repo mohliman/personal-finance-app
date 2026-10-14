@@ -27,3 +27,9 @@ test-results*/
 playwright-report/
 tests/screenshots/
 .vercel
+
+# Full-stack runtime state
+data/
+server/dist/
+.env
+*.sqlite*

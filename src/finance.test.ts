@@ -90,6 +90,8 @@ describe('transaction ordering and persistence', () => {
     expect(validStoredState({ ...initialState, balance: { ...initialState.balance, current: -1 } })).toBe(false);
     expect(validStoredState({ ...initialState, pots: [{ ...initialState.pots[0], total: '159' }] })).toBe(false);
     expect(validStoredState({ ...initialState, budgets: [...initialState.budgets, initialState.budgets[0]] })).toBe(false);
+    expect(validStoredState({ ...initialState, budgets: [null] })).toBe(false);
+    expect(validStoredState({ ...initialState, pots: [null] })).toBe(false);
     expect(validStoredState(null)).toBe(false);
   });
 });
