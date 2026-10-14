@@ -62,7 +62,7 @@ npm run test:fullstack
 
 The implementation passed 13 existing calculation tests, 5 backend integration scenarios, and 9 browser workflow checks. Backend coverage includes editable transactions, cent arithmetic, monthly totals, invalid dates, invalid amounts, pot overdrafts, duplicate budgets/pots, concurrent transfers, account isolation, logout/login, persistence after restart, and migration preservation. Browser coverage includes registration, opening balance, transaction creation/edit/reload, pot creation and transfer, derived balances, sign-out/sign-in, and five routes at 390px. The desktop overview axe scan returned zero WCAG A/AA violations. Evidence is in `verification/fullstack/`. Physical-device and assistive-technology testing remain outside this verification.
 
-## Deploy
+## Original local deployment option
 
 Use a Node 24 host or the included Dockerfile, with the UI and API served from the same origin. The existing Vercel URL is the earlier frontend-only deployment; these backend changes have not been published there. A static Vite deployment alone cannot run this server.
 
@@ -71,3 +71,11 @@ Set `NODE_ENV=production`, `HOST=0.0.0.0`, `PORT=3000`, `APP_ORIGIN=https://your
 Docker packaging was prepared but not executed. No remote backend was deployed. Email verification, password recovery, operational monitoring, and managed backups remain production work. There are no bank connections, bill payments, investment features, or real money transfers.
 
 Frontend challenge design and supplied assets are credited to Frontend Mentor. Premium design files remain excluded. Existing font licenses and challenge documentation are retained.
+
+## Free Render + Turso deployment
+
+The current `render.yaml` selects free Render compute and has no paid disk. Configure a separate free Turso database for each app. Set `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` in Render's environment settings; never commit these credentials. The official `libsql` driver connects directly to the hosted SQLite-compatible database, so records and sessions do not depend on Render's temporary filesystem.
+
+The app uses `RENDER_EXTERNAL_URL` for HTTPS cookie and origin configuration when `APP_ORIGIN` is omitted. It refuses to start on Render if hosted database configuration is missing. Free Render services can sleep when idle; the next request may wait for a cold start. Free database limits still apply, and paid plans/overages must remain disabled.
+
+Local development continues to use Node's built-in SQLite by default. To verify the optional driver locally in PowerShell, set `$env:DATABASE_DRIVER='libsql'` and run `npm run test:server`. This uses a local test database through the same compatible driver. Real remote persistence must also be checked after the service and hosted database are configured.

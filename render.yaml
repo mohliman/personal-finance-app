@@ -2,7 +2,7 @@ services:
   - type: web
     name: baqir-personal-finance
     runtime: node
-    plan: starter
+    plan: free
     region: oregon
     buildCommand: npm ci --include=dev && npm run build
     startCommand: npm start
@@ -15,9 +15,7 @@ services:
         value: production
       - key: HOST
         value: 0.0.0.0
-      - key: DATABASE_PATH
-        value: /var/data/app.sqlite
-    disk:
-      name: app-data
-      mountPath: /var/data
-      sizeGB: 1
+      - key: TURSO_DATABASE_URL
+        sync: false
+      - key: TURSO_AUTH_TOKEN
+        sync: false

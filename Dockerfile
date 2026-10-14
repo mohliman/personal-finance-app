@@ -7,6 +7,8 @@ RUN npm run build
 
 FROM node:24-bookworm-slim
 WORKDIR /app
+COPY --from=build /app/package*.json ./
+RUN npm ci --omit=dev
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/server/dist ./server/dist
 RUN mkdir /data && chown node:node /data

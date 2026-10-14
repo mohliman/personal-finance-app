@@ -1,4 +1,6 @@
 import { createServer } from "node:http";
+import { createRequire } from "node:module";
+const require = createRequire(import.meta.url);
 import { DatabaseSync } from "node:sqlite";
 import {
   randomBytes,
@@ -51,9 +53,15 @@ export function createApplication(adapter, options = {}) {
     options.databasePath ??
     process.env.DATABASE_PATH ??
     resolve(root, "data/app.sqlite");
-  if (databasePath !== ":memory:")
+  if (databasePath !== ":memory:" && !(options.cloudUrl ?? process.env.TURSO_DATABASE_URL))
     mkdirSync(dirname(resolve(databasePath)), { recursive: true });
-  const db = new DatabaseSync(databasePath);
+  const cloudUrl = options.cloudUrl ?? process.env.TURSO_DATABASE_URL;
+  const cloudToken = options.cloudToken ?? process.env.TURSO_AUTH_TOKEN;
+  if (process.env.RENDER === 'true' && (!cloudUrl || !cloudToken)) throw new Error('Render requires TURSO_DATABASE_URL and TURSO_AUTH_TOKEN for persistent storage.');
+  if (cloudUrl && !cloudToken) throw new Error('TURSO_AUTH_TOKEN is required for hosted storage.');
+  if (cloudUrl && !cloudUrl.startsWith('libsql://') && !cloudUrl.startsWith('https://')) throw new Error('Hosted database URL must use TLS.');
+  const useLibsql = Boolean(cloudUrl || options.driver === 'libsql' || process.env.DATABASE_DRIVER === 'libsql');
+  const db = useLibsql ? new (require('libsql'))(cloudUrl ?? databasePath, cloudUrl ? {authToken: cloudToken} : {}) : new DatabaseSync(databasePath);
   db.exec(`PRAGMA foreign_keys=ON; PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;
     CREATE TABLE IF NOT EXISTS schema_migrations(version INTEGER PRIMARY KEY, applied_at TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS users(id TEXT PRIMARY KEY, email TEXT NOT NULL UNIQUE, name TEXT NOT NULL, password_hash TEXT NOT NULL, created_at TEXT NOT NULL);
