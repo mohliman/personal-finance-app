@@ -62,7 +62,9 @@ export function createApplication(adapter, options = {}) {
   if (cloudUrl && !cloudUrl.startsWith('libsql://') && !cloudUrl.startsWith('https://')) throw new Error('Hosted database URL must use TLS.');
   const useLibsql = Boolean(cloudUrl || options.driver === 'libsql' || process.env.DATABASE_DRIVER === 'libsql');
   const db = useLibsql ? new (require('libsql'))(cloudUrl ?? databasePath, cloudUrl ? {authToken: cloudToken} : {}) : new DatabaseSync(databasePath);
-  db.exec(`PRAGMA foreign_keys=ON; PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;
+  // Turso manages its journal and lock timeout; those PRAGMAs are local-only.
+  if (!cloudUrl) db.exec("PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;");
+  db.exec(`PRAGMA foreign_keys=ON;
     CREATE TABLE IF NOT EXISTS schema_migrations(version INTEGER PRIMARY KEY, applied_at TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS users(id TEXT PRIMARY KEY, email TEXT NOT NULL UNIQUE, name TEXT NOT NULL, password_hash TEXT NOT NULL, created_at TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS sessions(token_hash TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, expires_at INTEGER NOT NULL);
