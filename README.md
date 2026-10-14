@@ -2,7 +2,7 @@
 
 A full-stack finance tracker with authenticated private accounts, editable transactions, monthly budgets, savings pots, recurring-expense summaries, and persistent data. React + TypeScript frontend, Node 24 API, and SQLite storage.
 
-[Open the live full-stack app](https://baqir-personal-finance.onrender.com). Hosted on Render's free Node compute with a separate Turso database. Create an account and choose sample records or an empty ledger. Free compute sleeps during inactivity, so the first visit can take 50 seconds or more.
+[Open the live full-stack app](https://personal-finance-ui.vercel.app). The original public address is retained through a Vercel rewrite to Render's free Node compute, with a separate Turso database. Create an account and choose sample records or an empty ledger. Free compute sleeps during inactivity, so the first visit can take 50 seconds or more.
 
 ## Run
 
@@ -21,6 +21,6 @@ npm run test:server
 npm run test:fullstack
 ```
 
-See [setup, accounting, migration, verification, and deployment](docs/fullstack.md). Prior frontend documentation is retained in [frontend history](docs-frontend-history.md). The existing [Vercel demo](https://personal-finance-ui.vercel.app) remains the earlier frontend version. The full-stack Render service deploys from the `fullstack-render` branch.
+See [setup, accounting, migration, verification, and deployment](docs/fullstack.md). Prior frontend documentation is retained in [frontend history](docs-frontend-history.md). Vercel and Render deploy the full-stack source from `main`. The direct [Render origin](https://baqir-personal-finance.onrender.com) also works.
 
 Frontend challenge design and supplied assets: Frontend Mentor. Existing asset/font licenses and premium-design exclusions are retained. No bank connections or real payments are implemented.

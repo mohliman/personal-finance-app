@@ -64,7 +64,7 @@ The implementation passed 13 existing calculation tests, 5 backend integration s
 
 ## Original local deployment option
 
-Use a Node 24 host or the included Dockerfile, with the UI and API served from the same origin. The existing Vercel URL is the earlier frontend-only deployment; these backend changes have not been published there. A static Vite deployment alone cannot run this server.
+Use a Node 24 host or the included Dockerfile, with the UI and API served from the same origin. The existing Vercel URL is retained as the public entry point using an external rewrite to the Render server. The Vercel project does not run the Node server itself.
 
 Set `NODE_ENV=production`, `HOST=0.0.0.0`, `PORT=3000`, `APP_ORIGIN=https://your-public-domain`, and `DATABASE_PATH=/data/app.sqlite`. Production startup requires HTTPS APP_ORIGIN. Use a persistent volume and one application instance for this SQLite version. The schema initializes automatically and records migration versions. Plan consistent SQLite backups and restore testing before accepting important data.
 
@@ -79,4 +79,9 @@ The current `render.yaml` selects free Render compute and has no paid disk. Conf
 The app uses `RENDER_EXTERNAL_URL` for HTTPS cookie and origin configuration when `APP_ORIGIN` is omitted. It refuses to start on Render if hosted database configuration is missing. Free Render services can sleep when idle; the next request may wait for a cold start. Free database limits still apply, and paid plans/overages must remain disabled.
 
 Local development continues to use Node's built-in SQLite by default. To verify the optional driver locally in PowerShell, set `$env:DATABASE_DRIVER='libsql'` and run `npm run test:server`. This uses a local test database through the same compatible driver. Real remote persistence must also be checked after the service and hosted database are configured.
+
+
+## Retained public address
+
+The public URL remains https://personal-finance-ui.vercel.app. The tracked vercel.json forwards all paths, including API requests, to https://baqir-personal-finance.onrender.com without changing the address bar. Render's ADDITIONAL_APP_ORIGINS explicitly permits https://personal-finance-ui.vercel.app; HTTPS cookies, origin validation, CSRF checks, and private API no-store caching remain enabled. Both hosting projects deploy from main. The Vercel rewrite configuration must remain in place on future deployments.
 

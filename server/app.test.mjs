@@ -11,6 +11,23 @@ async function action(client, action, revision) {
     revision: revision ?? (await client.request("/api/state")).body.revision,
   });
 }
+
+test("Finance accepts its retained Vercel address while preserving origin and CSRF checks", async (t) => {
+  const publicOrigin = "https://personal-finance-ui.vercel.app";
+  const { app, client, origin } = await launch(createFinance, { additionalOrigins: [publicOrigin] });
+  t.after(() => app.close());
+  const user = client();
+  await user.register("retained-url@example.test");
+  const revision = (await user.request("/api/state")).body.revision;
+  const payload = { revision, action: { type: "set-opening", amount: 321.45 } };
+  const allowed = await user.request("/api/actions", "POST", payload, { Origin: publicOrigin });
+  assert.equal(allowed.status, 200);
+  assert.equal(allowed.body.state.balance.current, 321.45);
+  assert.equal((await user.request("/api/logout", "POST", {}, { Origin: publicOrigin + ".attacker.test" })).status, 403);
+  const forged = await fetch(origin + "/api/logout", { method: "POST", headers: { Origin: publicOrigin, Cookie: user.cookie(), "Content-Type": "application/json" }, body: "{}" });
+  assert.equal(forged.status, 403);
+  assert.equal((await user.request("/api/logout", "POST", {}, { Origin: publicOrigin })).status, 200);
+});
 test("Finance starts empty, calculates editable transactions in cents, and selects monthly totals", async (t) => {
   const { app, client } = await launch(createFinance);
   t.after(() => app.close());

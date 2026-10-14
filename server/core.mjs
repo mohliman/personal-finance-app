@@ -71,6 +71,12 @@ export function createApplication(adapter, options = {}) {
     INSERT OR IGNORE INTO schema_migrations VALUES(1, datetime('now'));`);
   adapter.initialize(db);
   const configuredOrigin = options.origin ?? process.env.APP_ORIGIN ?? process.env.RENDER_EXTERNAL_URL;
+  const additionalOrigins = options.additionalOrigins ?? (process.env.ADDITIONAL_APP_ORIGINS ?? "").split(",").map((origin) => origin.trim()).filter(Boolean);
+  for (const origin of additionalOrigins) {
+    const parsed = new URL(origin);
+    if (parsed.origin !== origin || !["https:", "http:"].includes(parsed.protocol) || (process.env.NODE_ENV === "production" && parsed.protocol !== "https:"))
+      throw new Error("Additional app origins must be exact origins and use HTTPS in production.");
+  }
   const secure = (configuredOrigin ?? "").startsWith(
     "https://",
   );
@@ -181,8 +187,8 @@ export function createApplication(adapter, options = {}) {
         const origin = req.headers.origin;
         const configured = configuredOrigin;
         const allowed = configured
-          ? [configured]
-          : [`http://${req.headers.host}`];
+          ? [configured, ...additionalOrigins]
+          : [`http://${req.headers.host}`, ...additionalOrigins];
         if (origin && !allowed.includes(origin))
           fail(403, "This origin is not allowed.");
         if (req.headers["sec-fetch-site"] === "cross-site")
